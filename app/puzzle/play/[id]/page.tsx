@@ -10,6 +10,7 @@ import InteractivePuzzlePiece from "@/components/InteractivePuzzlePiece";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default function PlayPuzzle() {
   const params = useParams();

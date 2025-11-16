@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default function PuzzleGallery() {
   const router = useRouter();

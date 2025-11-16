@@ -9,6 +9,7 @@ import PuzzleCanvas from "@/components/PuzzleCanvas";
 import { generatePuzzleMetadata } from "@/app/actions/ai";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default function CreatePuzzle() {
   const router = useRouter();
