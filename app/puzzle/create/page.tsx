@@ -99,14 +99,32 @@ export default function CreatePuzzle() {
     setError("");
 
     try {
-      const puzzleId = await createPuzzle({
-        title: title.trim(),
-        description: description.trim(),
-        imageUrl,
-        pieces,
-      });
+      // Generate a unique ID
+      const localPuzzleId = `local_${Date.now()}`;
+      let puzzleId = localPuzzleId;
 
-      // Save to localStorage as backup
+      // Try to save to Convex with timeout
+      try {
+        const convexPromise = createPuzzle({
+          title: title.trim(),
+          description: description.trim(),
+          imageUrl,
+          pieces,
+        });
+
+        // Wait max 3 seconds for Convex
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Convex timeout")), 3000)
+        );
+
+        puzzleId = await Promise.race([convexPromise, timeoutPromise]) as string;
+      } catch (convexErr) {
+        console.warn("Convex not available, using localStorage only:", convexErr);
+        // Use local ID if Convex fails
+        puzzleId = localPuzzleId;
+      }
+
+      // Save to localStorage (primary storage when Convex unavailable)
       try {
         const puzzles = JSON.parse(
           localStorage.getItem("puzzles") || "[]"
@@ -123,6 +141,7 @@ export default function CreatePuzzle() {
         localStorage.setItem("puzzles", JSON.stringify(puzzles));
       } catch (e) {
         console.error("Failed to save to localStorage:", e);
+        throw new Error("Failed to save puzzle");
       }
 
       router.push(`/puzzle/play/${puzzleId}`);
