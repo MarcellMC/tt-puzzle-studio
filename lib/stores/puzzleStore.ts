@@ -29,11 +29,24 @@ export const usePuzzleStore = create<PuzzleState>((set, get) => ({
   completedPieceIds: new Set(),
 
   setPieces: (pieces) => {
+    // Calculate offset for centered 400x500 image in working area
+    // The image is centered with CSS: left-1/2, -translate-x-1/2
+    const containerWidth = typeof window !== 'undefined'
+      ? Math.min(window.innerWidth - 32, 1280) // max-w-7xl with padding
+      : 1200;
+    const imageWidth = Math.min(400, containerWidth * 0.9);
+    const offsetX = (containerWidth - imageWidth) / 2;
+    const offsetY = 50; // Some top margin for visual balance
+
     set({
       pieces: pieces.map((p, i) => ({
         ...p,
-        currentX: p.currentX ?? p.x + Math.random() * 200 - 100,
-        currentY: p.currentY ?? p.y + Math.random() * 200 - 100,
+        // Adjust correct positions for centered image
+        correctX: p.correctX + offsetX,
+        correctY: p.correctY + offsetY,
+        // Randomize initial positions (but also offset them)
+        currentX: p.currentX ?? (p.x + offsetX + Math.random() * 200 - 100),
+        currentY: p.currentY ?? (p.y + offsetY + Math.random() * 200 - 100),
         rotation: p.rotation ?? 0,
         isLocked: p.isLocked ?? false,
         zIndex: p.zIndex ?? i,

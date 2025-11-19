@@ -36,23 +36,7 @@ export default function PlayPuzzle() {
   // Load puzzle from Convex or localStorage
   useEffect(() => {
     if (puzzle) {
-      // Calculate offset to center the 400x500 image in the working area
-      const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-      const imageWidth = Math.min(400, containerWidth * 0.9);
-      const imageHeight = imageWidth * 1.25; // 4:5 ratio
-
-      // Center offset
-      const offsetX = (containerWidth - imageWidth) / 2;
-      const offsetY = 50; // Top margin
-
-      // Adjust piece positions to account for centered image
-      const adjustedPieces = puzzle.pieces.map((p) => ({
-        ...p,
-        correctX: p.correctX + offsetX,
-        correctY: p.correctY + offsetY,
-      }));
-
-      setPieces(adjustedPieces);
+      setPieces(puzzle.pieces);
       setLocalPuzzle(puzzle);
     } else {
       // Try localStorage as fallback
@@ -60,20 +44,7 @@ export default function PlayPuzzle() {
         const puzzles = JSON.parse(localStorage.getItem("puzzles") || "[]");
         const found = puzzles.find((p: any) => p._id === puzzleId);
         if (found) {
-          // Same offset calculation for localStorage puzzles
-          const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-          const imageWidth = Math.min(400, containerWidth * 0.9);
-          const imageHeight = imageWidth * 1.25;
-          const offsetX = (containerWidth - imageWidth) / 2;
-          const offsetY = 50;
-
-          const adjustedPieces = found.pieces.map((p: any) => ({
-            ...p,
-            correctX: p.correctX + offsetX,
-            correctY: p.correctY + offsetY,
-          }));
-
-          setPieces(adjustedPieces);
+          setPieces(found.pieces);
           setLocalPuzzle(found);
         }
       } catch (e) {
