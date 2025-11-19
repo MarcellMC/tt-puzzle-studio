@@ -36,7 +36,23 @@ export default function PlayPuzzle() {
   // Load puzzle from Convex or localStorage
   useEffect(() => {
     if (puzzle) {
-      setPieces(puzzle.pieces);
+      // Calculate offset to center the 400x500 image in the working area
+      const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+      const imageWidth = Math.min(400, containerWidth * 0.9);
+      const imageHeight = imageWidth * 1.25; // 4:5 ratio
+
+      // Center offset
+      const offsetX = (containerWidth - imageWidth) / 2;
+      const offsetY = 50; // Top margin
+
+      // Adjust piece positions to account for centered image
+      const adjustedPieces = puzzle.pieces.map((p) => ({
+        ...p,
+        correctX: p.correctX + offsetX,
+        correctY: p.correctY + offsetY,
+      }));
+
+      setPieces(adjustedPieces);
       setLocalPuzzle(puzzle);
     } else {
       // Try localStorage as fallback
@@ -44,7 +60,20 @@ export default function PlayPuzzle() {
         const puzzles = JSON.parse(localStorage.getItem("puzzles") || "[]");
         const found = puzzles.find((p: any) => p._id === puzzleId);
         if (found) {
-          setPieces(found.pieces);
+          // Same offset calculation for localStorage puzzles
+          const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+          const imageWidth = Math.min(400, containerWidth * 0.9);
+          const imageHeight = imageWidth * 1.25;
+          const offsetX = (containerWidth - imageWidth) / 2;
+          const offsetY = 50;
+
+          const adjustedPieces = found.pieces.map((p: any) => ({
+            ...p,
+            correctX: p.correctX + offsetX,
+            correctY: p.correctY + offsetY,
+          }));
+
+          setPieces(adjustedPieces);
           setLocalPuzzle(found);
         }
       } catch (e) {
@@ -230,24 +259,34 @@ export default function PlayPuzzle() {
       </div>
 
       {/* Puzzle area */}
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Working area container - full width with centered puzzle image */}
         <div
-          className="relative bg-white rounded-xl shadow-lg overflow-hidden"
+          className="relative bg-white rounded-xl shadow-lg mx-auto"
           style={{
-            minHeight: "500px",
+            width: "100%",
+            minHeight: "600px",
             position: "relative",
           }}
           role="application"
           aria-label="Puzzle playing area"
         >
-          {/* Reference image (faded) */}
-          <img
-            src={currentPuzzle.imageUrl}
-            alt="Puzzle reference"
-            className="absolute inset-0 w-full h-full object-contain opacity-10 pointer-events-none"
-          />
+          {/* Reference image (faded) - centered with 4:5 ratio */}
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{
+              width: "min(400px, 90vw)",
+              aspectRatio: "4 / 5",
+            }}
+          >
+            <img
+              src={currentPuzzle.imageUrl}
+              alt="Puzzle reference"
+              className="w-full h-full object-cover opacity-10 rounded-lg"
+            />
+          </div>
 
-          {/* Puzzle pieces */}
+          {/* Puzzle pieces - can move anywhere in the container */}
           {pieces.map((piece) => (
             <InteractivePuzzlePiece
               key={piece.id}
@@ -305,8 +344,8 @@ export default function PlayPuzzle() {
         )}
       </AnimatePresence>
 
-      {/* Keyboard shortcuts help */}
-      <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-3 text-xs text-gray-600 max-w-xs">
+      {/* Keyboard shortcuts help - desktop only */}
+      <div className="hidden md:block fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-3 text-xs text-gray-600 max-w-xs">
         <div className="font-semibold mb-1">Keyboard Shortcuts:</div>
         <div>• Arrow keys: Move selected piece</div>
         <div>• Shift + Arrow: Move faster</div>
