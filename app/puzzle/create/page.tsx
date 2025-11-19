@@ -6,7 +6,9 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { PuzzlePiece } from "@/lib/types";
 import PuzzleCanvas from "@/components/PuzzleCanvas";
+import ImageCropper from "@/components/ImageCropper";
 import { generatePuzzleMetadata } from "@/app/actions/ai";
+import { AnimatePresence } from "framer-motion";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,6 +16,8 @@ export const runtime = "nodejs";
 export default function CreatePuzzle() {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
+  const [showCropper, setShowCropper] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [pieces, setPieces] = useState<PuzzlePiece[]>([]);
   const [title, setTitle] = useState("");
@@ -36,11 +40,12 @@ export default function CreatePuzzle() {
 
       setImageFile(file);
 
-      // Convert to base64 data URL for both canvas and OpenAI
+      // Convert to base64 data URL and show cropper
       const reader = new FileReader();
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string;
-        setImageUrl(dataUrl);
+        setUploadedImageUrl(dataUrl);
+        setShowCropper(true);
       };
       reader.readAsDataURL(file);
 
@@ -49,6 +54,17 @@ export default function CreatePuzzle() {
     },
     []
   );
+
+  const handleCropComplete = useCallback((croppedDataUrl: string) => {
+    setImageUrl(croppedDataUrl);
+    setShowCropper(false);
+  }, []);
+
+  const handleCropCancel = useCallback(() => {
+    setShowCropper(false);
+    setUploadedImageUrl("");
+    setImageFile(null);
+  }, []);
 
   const handleGenerateAI = async () => {
     if (!imageUrl) return;
@@ -235,6 +251,17 @@ export default function CreatePuzzle() {
           )}
         </div>
       </div>
+
+      {/* Image Cropper Modal */}
+      <AnimatePresence>
+        {showCropper && uploadedImageUrl && (
+          <ImageCropper
+            imageDataUrl={uploadedImageUrl}
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

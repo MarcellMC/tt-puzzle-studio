@@ -36,21 +36,9 @@ export default function PuzzleCanvas({
     img.onload = () => {
       imageRef.current = img;
 
-      // Calculate canvas size to fit image while maintaining aspect ratio
-      const maxWidth = 800;
-      const maxHeight = 600;
-      let width = img.width;
-      let height = img.height;
-
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
-      }
-
-      if (height > maxHeight) {
-        width = (width * maxHeight) / height;
-        height = maxHeight;
-      }
+      // Fixed Instagram portrait ratio: 400x500 (4:5)
+      const width = 400;
+      const height = 500;
 
       canvas.width = width;
       canvas.height = height;
